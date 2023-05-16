@@ -6,6 +6,7 @@ const shopRouter = require("./routes/shop");
 const path = require("path");
 const expressHbs = require('express-handlebars');
 const {get404} = require("./controllers/error");
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // app.engine("hbs", expressHbs({layoutsDir: 'views/layouts', defaultLayout: 'main-layout', extname: 'hbs'}));
