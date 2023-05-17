@@ -4,8 +4,9 @@ const app = express();
 const adminRouter = require("./routes/admin").router;
 const shopRouter = require("./routes/shop");
 const path = require("path");
-const expressHbs = require('express-handlebars');
+// const expressHbs = require('express-handlebars');
 const {get404} = require("./controllers/error");
+const sequelize = require('./util/database');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -22,6 +23,11 @@ app.use(shopRouter);
 
 app.use(get404)
 
-app.listen(3000, function () {
-    console.log("info", 'Server is running at port : ' + 3000);
-});
+sequelize.sync().then(result => {
+    // console.log(result)
+    app.listen(3000, function () {
+        console.log("info", 'Server is running at port : ' + 3000);
+    });
+}).catch(err =>
+    console.log(err)
+)

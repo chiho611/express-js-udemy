@@ -1,37 +1,67 @@
 const Product = require('../models/product')
 const Cart = require('../models/cart')
+const e = require("express");
 
-exports.getAllProduct = (req, res, next) => {
-    Product.fetchAll().then(
-        ([rows, fieldData]) => {
-            // console.log(rows)
-            res.render('shop/product-list',
-                {
-                    prods: rows,
-                    pageTitle: 'All Products',
-                    path: "/products"
-                }
-            )
-        }
-    ).catch(
-        err => {
-            console.log(err)
-        }
-    )
-}
+// exports.getAllProduct = (req, res, next) => {
+//     Product.findAll().then(products => {
+//         res.render('shop/product-list',
+//             {
+//                 prods: products,
+//                 pageTitle: 'All Products',
+//                 path: "/products"
+//             }
+//         )
+//     }).catch(err => console.log(err));
+//     //mysql 2
+//
+// //     Product.fetchAll().then(
+// //         ([rows, fieldData]) => {
+// //             // console.log(rows)
+// //             res.render('shop/product-list',
+// //                 {
+// //                     prods: rows,
+// //                     pageTitle: 'All Products',
+// //                     path: "/products"
+// //                 }
+// //             )
+// //         }
+// //     ).catch(
+// //         err => {
+// //             console.log(err)
+// //         }
+// //     )
+// }
 
 exports.getProduct = (req, res, next) => {
     const {productId} = req.params;
 
-    Product.findById(productId).then(([product]) =>
-        res.render('shop/product-detail', {
-            product: product[0],
-            pageTitle: product[0].title,
-            path: "/products"
-        }))
-        .catch(
-            err => console.log(err)
-        )
+    Product.findAll({where: {id: productId}})
+        .then(products => {
+            res.render('shop/product-detail', {
+                product: products[0],
+                pageTitle: products[0].title,
+                path: "/products"
+            })
+        }).catch(err => console.log(err))
+
+    // Product.findByPk(productId).then(product => {
+    //     res.render('shop/product-detail', {
+    //         product: product,
+    //         pageTitle: product.title,
+    //         path: "/products"
+    //     })
+    // }).catch(err => console.log(err))
+
+    // mysql2
+    // Product.findById(productId).then(([product]) =>
+    //     res.render('shop/product-detail', {
+    //         product: product[0],
+    //         pageTitle: product[0].title,
+    //         path: "/products"
+    //     }))
+    //     .catch(
+    //         err => console.log(err)
+    //     )
     //From Json
     // Product.findById(productId, product => {
     //     res.render('shop/product-detail', {
@@ -43,22 +73,33 @@ exports.getProduct = (req, res, next) => {
 }
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll().then(
-        ([rows, fieldData]) => {
-            // console.log(rows)
-            res.render('shop/index',
-                {
-                    prods: rows,
-                    pageTitle: 'shop',
-                    path: "/"
-                }
-            )
-        }
-    ).catch(
-        err => {
-            console.log(err)
-        }
-    )
+    Product.findAll().then(products => {
+        res.render('shop/index',
+            {
+                prods: products,
+                pageTitle: 'shop',
+                path: "/"
+            }
+        )
+    }).catch(err => console.log(err));
+
+    // mysql2
+    // Product.fetchAll().then(
+    //     ([rows, fieldData]) => {
+    //         // console.log(rows)
+    //         res.render('shop/index',
+    //             {
+    //                 prods: rows,
+    //                 pageTitle: 'shop',
+    //                 path: "/"
+    //             }
+    //         )
+    //     }
+    // ).catch(
+    //     err => {
+    //         console.log(err)
+    //     }
+    // )
 
     //from JSON
     // Product.fetchAll(products => {
