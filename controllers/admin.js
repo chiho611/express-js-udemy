@@ -3,22 +3,18 @@ const mongodb = require("mongodb");
 
 exports.getAddProduct = (req, res, next) => {
     res.render("admin/edit-product", {
-        pageTitle: "Add Product",
-        path: "/admin/add-product",
-        editing: false
+        pageTitle: "Add Product", path: "/admin/add-product", editing: false
     })
 }
 
 exports.postAddProduct = (req, res, next) => {
     const {title, price, description, imageUrl} = req.body;
 
-    const product = new Product(title, price, description, imageUrl);
+    const product = new Product(title, price, description, imageUrl, null, req.user._id);
 
     product
         .save()
         .then(result => {
-            console.log("created product")
-            // console.log(result)
             res.redirect('/admin/products');
         }).catch(err => {
         console.log(err)
@@ -32,10 +28,7 @@ exports.getEditProduct = (req, res, next) => {
             return res.redirect('/')
         }
         res.render("admin/edit-product", {
-            pageTitle: "Edit Product",
-            path: "/admin/edit-product",
-            editing: true,
-            product
+            pageTitle: "Edit Product", path: "/admin/edit-product", editing: true, product
         })
     }).catch(err => console.log(err))
 }
@@ -46,12 +39,9 @@ exports.postEditProduct = (req, res, next) => {
     const product = new Product(title, price, description, imageUrl, productId)
 
     product.save().then(result => {
-        console.log(result)
         res.redirect('/admin/products')
     })
-        .catch(
-            err => console.log(err)
-        )
+        .catch(err => console.log(err))
 }
 
 exports.getAdminProducts = (req, res, next) => {
@@ -59,9 +49,7 @@ exports.getAdminProducts = (req, res, next) => {
     Product.fetchAll()
         .then(products => {
             res.render("admin/products", {
-                prods: products,
-                pageTitle: "Admin Products",
-                path: "/admin/products"
+                prods: products, pageTitle: "Admin Products", path: "/admin/products"
             })
         })
         .catch(err => console.log(err));
@@ -73,7 +61,6 @@ exports.postDeleteProduct = (req, res, next) => {
 
     Product.deleteById(productId)
         .then(result => {
-            console.log("product destroyed", result)
             res.redirect('/admin/products');
         })
         .catch(err => {
