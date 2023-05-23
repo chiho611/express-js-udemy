@@ -15,6 +15,17 @@ class User {
         return getDb().collection('users').insertOne(this);
     }
 
+    static findById(userId) {
+        return getDb().collection('users')
+            .findOne({_id: new ObjectId(userId)})
+            .then(user => {
+                return user;
+            })
+            .catch(err => {
+                console.log(err)
+            });
+    }
+
     addToCart(product) {
         if (this.cart) {
             const cartProductIndex = this.cart.items.findIndex(cartProduct => {
@@ -81,16 +92,32 @@ class User {
             })
     }
 
-    static findById(userId) {
-        return getDb().collection('users')
-            .findOne({_id: new ObjectId(userId)})
-            .then(user => {
-                return user;
+    addOrder() {
+        return this.getCart()
+            .then(products => {
+                const order = {
+                    products: products,
+                    user: {
+                        _id: this._id,
+                        name: this.name
+                    }
+                }
+                return getDb().collection('orders')
+                    .insertOne(order)
             })
-            .catch(err => {
-                console.log(err)
+            .then(result => {
+                this.cart = {items: []};
+                return getDb().collection('users')
+                    .updateOne({_id: new ObjectId(this._id)}, {$set: {cart: {items: []}}})
             });
     }
+
+    getOrders() {
+        return getDb().collection('orders')
+            .find({'user._id': new ObjectId(this._id)})
+            .toArray()
+    }
+
 }
 
 
