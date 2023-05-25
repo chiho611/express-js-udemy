@@ -3,16 +3,27 @@ const bodyParser = require("body-parser");
 const app = express();
 const adminRouter = require("./routes/admin");
 const shopRouter = require("./routes/shop");
+const authRouter = require("./routes/auth");
 const path = require("path");
 // const expressHbs = require('express-handlebars');
 const {get404} = require("./controllers/error");
 const {mongooseConnect} = require('./util/database');
 const User = require('./models/user');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
 app.use(express.static(path.join(__dirname, 'public')));
+const store = new MongoDBStore({
+    uri: 'mongodb+srv://chiho:k3DNW706u9lIcABX@cluster0.swnckh2.mongodb.net/shop',
+    collection: 'sessions'
+});
 
+app.use(session({secret: 'my secret', saveUninitialized: false, resave: false, store: store}))
 app.use((req, res, next) => {
-    User.findById("646d8f05892cb084c465a1a0")
+    if (!req.session.user) {
+        return next();
+    }
+    User.findById(req.session.user._id)
         .then(user => {
             req.user = user;
             next();
@@ -33,6 +44,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.use('/admin', adminRouter);
 app.use(shopRouter);
+app.use(authRouter);
 
 app.use(get404)
 
