@@ -11,14 +11,24 @@ const {mongooseConnect} = require('./util/database');
 const User = require('./models/user');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
+const mongoose = require("mongoose");
+const flash = require("connect-flash");
+const csrfProtection = csrf();
 
 app.use(express.static(path.join(__dirname, 'public')));
+const MONGODB_URI =
+    'mongodb+srv://chiho:k3DNW706u9lIcABX@cluster0.swnckh2.mongodb.net/shop';
+
 const store = new MongoDBStore({
-    uri: 'mongodb+srv://chiho:k3DNW706u9lIcABX@cluster0.swnckh2.mongodb.net/shop',
+    uri: MONGODB_URI,
     collection: 'sessions'
 });
 
 app.use(session({secret: 'my secret', saveUninitialized: false, resave: false, store: store}))
+
+app.use(flash());
+
 app.use((req, res, next) => {
     if (!req.session.user) {
         return next();
@@ -42,31 +52,25 @@ app.set("view engine", 'ejs');
 
 app.use(bodyParser.urlencoded({extended: false}));
 
+app.use(csrfProtection)
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
+
 app.use('/admin', adminRouter);
 app.use(shopRouter);
 app.use(authRouter);
 
 app.use(get404)
 
-mongooseConnect()
+mongoose.connect(MONGODB_URI)
     .then(result => {
-
-        User.findOne().then(user => {
-            if (!user) {
-                const user = new User({
-                    name: 'alvin',
-                    email: 'test@test.com',
-                    cart: {items: []}
-                })
-                user.save();
-            }
-        })
-
         app.listen(3000, function () {
             console.log("info", 'Server is running at port : ' + 3000);
         });
     })
     .catch(err => {
-        console.log(err)
-    })
-;
+        console.log(err);
+    });

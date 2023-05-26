@@ -3,11 +3,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-    name: {
+    // name: {
+    //     type: String, require: true
+    // },
+    email: {
         type: String, require: true
-    }, email: {
+    },
+    password: {
         type: String, require: true
-    }, cart: {
+    },
+    cart: {
         items: [{
             productId: {
                 type: Schema.Types.ObjectId, ref: 'Product', require: true
