@@ -1,5 +1,18 @@
 const Product = require('../models/product')
-const mongodb = require("mongodb");
+
+exports.getAdminProducts = (req, res, next) => {
+
+    Product.find({userId: req.user})
+        .then(products => {
+            res.render("admin/products", {
+                prods: products,
+                pageTitle: "Admin Products",
+                path: "/admin/products"
+            })
+        })
+        .catch(err => console.log(err));
+
+}
 
 exports.getAddProduct = (req, res, next) => {
     res.render("admin/edit-product", {
@@ -49,36 +62,26 @@ exports.postEditProduct = (req, res, next) => {
 
     Product.findById(productId)
         .then(product => {
+            if (product.userId.toString() !== req.user._id.toString()) {
+                return res.redirect('/admin/products')
+            }
             product.title = title
             product.price = price
             product.description = description
             product.imageUrl = imageUrl
-            return product.save()
+            return product.save().then(result => {
+                res.redirect('/admin/products')
+            })
         })
-        .then(result => {
-            res.redirect('/admin/products')
-        })
+
         .catch(err => console.log(err))
 }
 
-exports.getAdminProducts = (req, res, next) => {
-
-    Product.find()
-        .then(products => {
-            res.render("admin/products", {
-                prods: products,
-                pageTitle: "Admin Products",
-                path: "/admin/products"
-            })
-        })
-        .catch(err => console.log(err));
-
-}
 
 exports.postDeleteProduct = (req, res, next) => {
     const {productId} = req.body;
 
-    Product.findByIdAndDelete(productId)
+    Product.deleteOne({_id: productId, userId: req.user._id})
         .then(result => {
             res.redirect('/admin/products');
         })
