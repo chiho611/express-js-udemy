@@ -6,7 +6,7 @@ const shopRouter = require("./routes/shop");
 const authRouter = require("./routes/auth");
 const path = require("path");
 // const expressHbs = require('express-handlebars');
-const {get404} = require("./controllers/error");
+const {get404, get500} = require("./controllers/error");
 const {mongooseConnect} = require('./util/database');
 const User = require('./models/user');
 const session = require('express-session');
@@ -35,11 +35,14 @@ app.use((req, res, next) => {
     }
     User.findById(req.session.user._id)
         .then(user => {
+            if (!user) {
+                return next();
+            }
             req.user = user;
             next();
         })
         .catch(err => {
-            console.log(err)
+            throw new Error(err)
         })
     // next();
 })
@@ -63,8 +66,11 @@ app.use('/admin', adminRouter);
 app.use(shopRouter);
 app.use(authRouter);
 
+app.get('/500', get500)
 app.use(get404)
-
+app.use((error, req, res, next) => {
+    res.redirect('/500');
+})
 mongoose.connect(MONGODB_URI)
     .then(result => {
         app.listen(3000, function () {
