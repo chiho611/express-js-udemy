@@ -10,7 +10,7 @@ router.get('/add-product', isAuth, getAddProduct)
 router.post('/add-product',
     [
         body('title').isString().isLength({min: 3}).trim(),
-        body('imageUrl').isURL(),
+        // body('imageUrl').isURL(),
         body('price').isFloat(),
         body('description').isLength({min: 5, max: 400}).trim()
     ]
@@ -22,7 +22,7 @@ router.get('/edit-product/:productId', isAuth, getEditProduct)
 router.post('/edit-product',
     [
         body('title').isString().isLength({min: 3}).trim(),
-        body('imageUrl').isURL(),
+        // body('imageUrl').isURL(),
         body('price').isFloat(),
         body('description').isLength({min: 5, max: 400}).trim()
     ]

@@ -15,8 +15,11 @@ const csrf = require('csurf');
 const mongoose = require("mongoose");
 const flash = require("connect-flash");
 const csrfProtection = csrf();
+const multer = require('multer');
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images',express.static(path.join(__dirname, 'images')));
+
 const MONGODB_URI =
     'mongodb+srv://chiho:k3DNW706u9lIcABX@cluster0.swnckh2.mongodb.net/shop';
 
@@ -55,6 +58,26 @@ app.set("view engine", 'ejs');
 
 app.use(bodyParser.urlencoded({extended: false}));
 
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images')
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().toISOString() + '-' + file.originalname)
+    }
+
+})
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+        cb(null, true)
+    } else {
+        cb(null, false)
+    }
+}
+
+app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image'))
+
 app.use(csrfProtection)
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isLoggedIn;
@@ -69,6 +92,7 @@ app.use(authRouter);
 app.get('/500', get500)
 app.use(get404)
 app.use((error, req, res, next) => {
+    console.log(error)
     res.redirect('/500');
 })
 mongoose.connect(MONGODB_URI)
